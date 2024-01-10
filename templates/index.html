@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>troplaflemme - automatic note taker</title>
+  <link rel="stylesheet" href="static/css/bootstrap.css">
+  <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+</head>
+<body>
+<div class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark">
+  <div class="container"><a href="" class="navbar-brand">troplaflemme</a></div>
+</div>
+<br><br><br><br>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12" align="center">
+      <h1>troplaflemme - automatic note taker</h1>
+      <p>troplaflemme is a web app that automatically takes notes for you. Just click the record button. When you're done, click submit to see your notes.</p>
+      <form action="{{ url_for('summary') }}" method="POST" onsubmit="showLoadingButton()">
+        <textarea id="textInput" class="form-control" type="text" name="transcript" rows=15 placeholder="Your text will be transcribed here"></textarea><br>
+        <img id="recordButton" src="static/img/record.svg" height="64px" width="64px" style="cursor: pointer;" onclick="toggleRecording()">
+        <br><br>
+        <button type="submit" class="btn btn-primary" id="submitButton">Get My Notes</button>
+        <button class="btn btn-primary" type="button" id="loadingButton" disabled style="display: none;">
+          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Generating Notes ...</button>
+      </form>
+    </div>
+  </div>
+  <br><br>
+  <div class="row">
+    <div class="col-md-12">
+      {% if summary != "" %}
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">AI Generated Notes:</h5>
+            <md-block>{{ summary }}</md-block>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<script>
+  var isRecording = false;
+  var recognition;
+  const lang = 'en-US';
+
+  function showLoadingButton() {
+    var submitButton = document.getElementById('submitButton');
+    var loadingButton = document.getElementById('loadingButton');
+
+    // Hide the submit button and show the loading button
+    submitButton.style.display = 'none';
+    loadingButton.style.display = 'block';
+  }
+
+  function toggleRecording() {
+    var recordButton = document.getElementById('recordButton');
+    if (!isRecording) {
+      if (window.hasOwnProperty('webkitSpeechRecognition')) {
+        recognition = new webkitSpeechRecognition();
+  
+        recognition.continuous = true;
+        recognition.interimResults = false;
+  
+        recognition.lang = lang;
+        recognition.start();
+  
+        recognition.onresult = function (e) {
+          document.getElementById('textInput').value += e.results[0][0].transcript + ' ';
+          recognition.stop();
+        };
+  
+        recognition.onerror = function (e) {
+          console.log('error', e);
+          recognition.stop();
+        };
+  
+        //keeps recording until button pressed
+        recognition.onend = function (e) {
+          console.log('ended', e);
+          if (isRecording){
+            recognition.start();
+          }
+        };
+      }
+      recordButton.src = 'static/img/stop.svg';
+      isRecording = true;
+    }
+    else {
+      recordButton.src = 'static/img/record.svg';
+      recognition.stop();
+      isRecording = false;
+    }
+  };
+</script>
+</body>
+</html>
