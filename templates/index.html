@@ -8,22 +8,40 @@
 </head>
 <body>
 <div class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark">
-  <div class="container"><a href="" class="navbar-brand">troplaflemme</a></div>
+  <div class="container"><a href="{{ url_for('index') }}" class="navbar-brand">troplaflemme</a></div>
 </div>
 <br><br><br><br>
 <div class="container">
   <div class="row">
     <div class="col-md-12" align="center">
       <h1>troplaflemme - automatic note taker</h1>
-      <p>troplaflemme is a web app that automatically takes notes for you. Just click the record button. When you're done, click submit to see your notes.</p>
-      <form action="{{ url_for('summary') }}" method="POST" onsubmit="showLoadingButton()">
-        <textarea id="textInput" class="form-control" type="text" name="transcript" rows=15 placeholder="Your text will be transcribed here"></textarea><br>
-        <img id="recordButton" src="static/img/record.svg" height="64px" width="64px" style="cursor: pointer;" onclick="toggleRecording()">
-        <br><br>
-        <button type="submit" class="btn btn-primary" id="submitButton">Get My Notes</button>
-        <button class="btn btn-primary" type="button" id="loadingButton" disabled style="display: none;">
-          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Generating Notes ...</button>
-      </form>
+      <p>troplaflemme is a web app that automatically takes notes for you. Just paste the transcript or upload the audio of the course. When you're done, click submit to see your notes.</p>
+      <br>
+      <div class="row">
+        <div class="col-md-6">
+          <h3>Transcribe .mp3/.wav file</h3>
+          <form action="{{ url_for('upload_audio') }}" method="POST" enctype="multipart/form-data" onsubmit="showUploading()">
+            <input type="file" class="form-control-file" name="audio_file" accept="audio/*" capture>
+            <br><br>
+            <button type="submit" class="btn btn-primary" id="upload">Transcribe</button>
+            <button class="btn btn-primary" type="button" id="uploading" disabled style="display: none;">
+              <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Transcribing file ...</button>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <h3>Or paste transcription here</h3>
+          <form action="{{ url_for('summary') }}" method="POST" onsubmit="showLoadingButton()">
+            <textarea id="textInput" class="form-control" type="text" name="transcript" rows=15 placeholder="Paste transcript here">
+              {{ transcription }}
+            </textarea><br>
+            <img id="recordButton" src="static/img/record.svg" height="64px" width="64px" style="cursor: pointer;" onclick="toggleRecording()">
+            <br><br>
+            <button type="submit" class="btn btn-primary" id="submitButton">Get My Notes</button>
+            <button class="btn btn-primary" type="button" id="loadingButton" disabled style="display: none;">
+              <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Generating Notes ...</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
   <br><br>
@@ -44,6 +62,15 @@
   var isRecording = false;
   var recognition;
   const lang = 'en-US';
+
+  function showUploading() {
+    var uploadButton = document.getElementById('upload');
+    var uploadingButton = document.getElementById('uploading');
+
+    // Hide the submit button and show the loading button
+    uploadButton.style.display = 'none';
+    uploadingButton.style.display = 'block';
+  }
 
   function showLoadingButton() {
     var submitButton = document.getElementById('submitButton');
