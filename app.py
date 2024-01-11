@@ -10,7 +10,7 @@ app.config['UPLOAD_FOLDER'] = 'static/audio'
 
 @app.route('/')
 def index():
-    return render_template("index.html", summary="")
+    return render_template("index.html", summary="", transcription="")
 
 @app.route("/", methods=["POST"])
 def summary():    
