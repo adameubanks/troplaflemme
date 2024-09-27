@@ -10,6 +10,9 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
+
 # Copy the current directory contents into the container at /app
 COPY . .
 
